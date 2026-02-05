@@ -5,8 +5,7 @@ From mathcomp
   Require Import ssrnat.
 
 Notation "[ x , .. , y ]" := (cons x .. (cons y nil) ..).
-Notation "x ⊕ y" := (app x y)
-                     (at level 75, right associativity).
+Notation "x ++ y" := (app x y).
 
 
 Section reactive.
@@ -38,12 +37,12 @@ Definition R
 (* 定義２　無限列に対するリアクティブシステムの出力 *)
 CoFixpoint R_omega'
     (r : R)
-    (pref : list I)
+    (acc : list I)
     (l : Stream I) : Stream O :=
   match l with
   | Cons hd tl =>
-      let new_pref := pref ⊕ [hd] in
-      Cons (r [hd]) (R_omega' r new_pref tl)
+      let new_acc := acc ++ [hd] in
+      Cons (r new_acc) (R_omega' r new_acc tl)
   end.
 
 Definition R_omega 
@@ -55,12 +54,12 @@ Definition R_omega
 (* 定義２'　有限列に対するリアクティブシステムの出力 *)
 Fixpoint R_omega_fin'
     (r : R)
-    (pref : list I)
+    (acc : list I)
     (l : list I) : list O :=
   match l with
   | cons hd tl =>
-      let new_pref := pref ⊕ [hd] in
-      cons (r [hd]) (R_omega_fin' r new_pref tl)
+      let new_acc := acc ++ [hd] in
+      cons (r new_acc) (R_omega_fin' r new_acc tl)
   | nil =>
       nil
   end.
@@ -119,7 +118,7 @@ Fixpoint empty_list_fin (m : nat) : list I :=
   end.
 
 
-(* 階層定理の証明に用いる定理 *)
+(* 階層定理の証明に用いる補題 *)
 Lemma empty_list_fin_length :
   forall m : nat,
     length (empty_list_fin m) = m.
@@ -141,7 +140,7 @@ Proof.
     + intro pref.
       intro r.
       simpl.
-      specialize(IHa_bar (pref ⊕ [hd])).
+      specialize(IHa_bar (pref ++ [hd])).
       specialize(IHa_bar r).
       rewrite -> IHa_bar. reflexivity.
 Qed.
@@ -561,3 +560,5 @@ Proof.
   exists b_hat.
   trivial.
 Qed.
+
+Check list.
